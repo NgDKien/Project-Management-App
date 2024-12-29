@@ -22,6 +22,7 @@ import {
 } from "redux-persist";
 import { PersistGate } from "redux-persist/integration/react";
 import createWebStorage from "redux-persist/lib/storage/createWebStorage";
+import { Middleware } from '@reduxjs/toolkit';
 
 /* REDUX PERSISTENCE */
 const createNoopStorage = () => {
@@ -55,17 +56,53 @@ const rootReducer = combineReducers({
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 /* REDUX STORE */
+//ORIGIN (ERROR)
+// export const makeStore = () => {
+//     return configureStore({
+//       reducer: persistedReducer,
+//       middleware: (getDefaultMiddleware) =>
+//         getDefaultMiddleware({
+//           serializableCheck: {
+//             ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+//           },
+//         }).concat(api.middleware),
+//     });
+//   };
+
+
+//-------------------Cách 1---------------------
+//Có thể thay getDefaultMiddleware bằng getDefault
+/* REDUX STORE */
 export const makeStore = () => {
     return configureStore({
         reducer: persistedReducer,
-        middleware: (getDefault) =>
-            getDefault({
+        middleware: getDefaultMiddleware =>
+            getDefaultMiddleware({
                 serializableCheck: {
                     ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
                 },
-            }).concat(api.middleware),
+            }).concat(api.middleware as any)
     });
 };
+
+//-------------------Cách 2---------------------
+//Có thể thay getDefaultMiddleware bằng getDefault
+
+// import { Tuple } from '@reduxjs/toolkit';
+// export const makeStore = () => {
+//     return configureStore({
+//         reducer: persistedReducer,
+//         middleware: (getDefaultMiddleware) => {
+//             const defaultMiddleware = getDefaultMiddleware({
+//                 serializableCheck: {
+//                     ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+//                 },
+//             }) as unknown as Tuple<[typeof api.middleware]>;
+
+//             return defaultMiddleware.concat(api.middleware);
+//         }
+//     });
+// };
 
 /* REDUX TYPES */
 export type AppStore = ReturnType<typeof makeStore>;
@@ -81,7 +118,8 @@ export default function StoreProvider({
     children: React.ReactNode;
 }) {
     // const storeRef = useRef<AppStore>();
-    const storeRef = useRef<AppStore | null>(null);
+    const storeRef = useRef<AppStore>(undefined);
+    // const storeRef = useRef<AppStore | null>(null);
     if (!storeRef.current) {
         storeRef.current = makeStore();
         setupListeners(storeRef.current.dispatch);
