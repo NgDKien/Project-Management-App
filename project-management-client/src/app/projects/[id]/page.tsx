@@ -6,7 +6,7 @@ import Board from "../BoardView";
 import List from "../ListView";
 import Timeline from "../TimelineView";
 import Table from "../TableView";
-// import ModalNewTask from "@/components/ModalNewTask";
+import ModalNewTask from "@/components/ModalNewTask";
 
 type Props = {
     //Từ phiên bản mới của Next, param được dùng như 1 promise và dùng use() để unwrap
@@ -20,11 +20,11 @@ const Project = ({ params }: Props) => {
 
     return (
         <div>
-            {/* <ModalNewTask
+            <ModalNewTask
                 isOpen={isModalNewTaskOpen}
                 onClose={() => setIsModalNewTaskOpen(false)}
                 id={id}
-            /> */}
+            />
             <ProjectHeader activeTab={activeTab} setActiveTab={setActiveTab} />
             {activeTab === "Board" && (
                 <Board id={id} setIsModalNewTaskOpen={setIsModalNewTaskOpen} />
